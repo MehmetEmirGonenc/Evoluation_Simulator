@@ -29,11 +29,11 @@ class Event:
     def set_probablity(self, probablity):
         self.probality = probablity
     
-    def set_trigger (self, trigger, value, feature ,condition, factor, change_type):
+    def set_trigger (self, trigger, value, feature ,condition, factor, change_type = "DEC"):
         """
         trigger: feature of creature
         value: Value to be checked depending on condition
-        condition: Equal(0), Greater(1), Smaller(2)
+        condition: Equal(E), Greater(G), Smaller(S)
         """
         trigger_index = self.creature.find_feature_index(trigger)
         # To handle wrong trigger features
@@ -49,13 +49,13 @@ class Event:
             self.process_event(factor, feature_index, change_type)
             return 0
         
-        if condition == 0:
+        if condition == 'E':
             if self.creature.features[trigger_index][1] == value:
                 self.process_event(factor, feature_index, change_type)
-        elif condition == 1:
+        elif condition == 'G':
             if self.creature.features[trigger_index][1] > value:
                 self.process_event(factor, feature_index, change_type)
-        elif condition == 2:
+        elif condition == 'S':
             if self.creature.features[trigger_index][1] < value:
                 self.process_event(factor, feature_index, change_type)
         else: # To handle with wrong condition

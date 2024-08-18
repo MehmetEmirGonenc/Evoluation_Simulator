@@ -10,12 +10,12 @@ def main():
     c1.print_features()
     
     e1 = Event("Test", c1, 2)
-    e1.set_probablity(100)
-    e1.set_trigger("health", 50, "health", 1, 5, "DEC")
+    e1.set_probablity(40)
+    e1.set_trigger("health", 50, "health", 'G', 5)
     c1.print_features()
-    e1.set_trigger("health", 50, "health", 1, 5, "DEC")
+    e1.set_trigger("health", 50, "health", 'G', 5)
     c1.print_features()
-    e1.set_trigger("health", 50, "health", 1, 5, "DEC")
+    e1.set_trigger("health", 50, "health", 'G', 5)
     c1.print_features()
 
 main()
