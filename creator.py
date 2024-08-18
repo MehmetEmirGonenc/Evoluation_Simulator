@@ -11,6 +11,9 @@ class Creator:
         self.features.append(["alived", alived])
         self.features.append(["health", health])
         
+    def get_name (self):
+        return self.name  
+    
     def add_features (self, features): # Adding new features at once to an object
         for feature in features: # Also features list should be a nested list that include ["feature_name", value]
             self.features.append(feature)
