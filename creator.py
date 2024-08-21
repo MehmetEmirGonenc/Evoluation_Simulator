@@ -14,6 +14,12 @@ class Creator:
     def get_name (self):
         return self.name  
     
+    def rename (self, new_name):
+        self.name = new_name
+    
+    def get_feature_list (self):
+        return self.features
+    
     def add_features (self, features): # Adding new features at once to an object
         for feature in features: # Also features list should be a nested list that include ["feature_name", value]
             self.features.append(feature)
@@ -32,7 +38,13 @@ class Creator:
         # If it isnt founded returns as -1
         return -1
     
-    def change_feature (self, feature_name, value): # Change spesific feature 
+    def rename_feature (self, feature_id, new_name):
+        self.features[feature_id][0] = new_name
+        
+    def remove_feature (self, feature_id):
+        del self.features[feature_id]
+    
+    def change_feature_value (self, feature_name, value): # Change spesific feature 
         index = self.find_feature_index(feature_name)
         if index != -1:
             self.features[index][1] = value
