@@ -11,11 +11,18 @@ class Event:
     2- Probablity_Event (2)
     """
     
-    def __init__ (self, name, creature, type):
+    def __init__ (self, name, creature):
         self.name = name
-        self.type = type
         self.creature = creature
+        
+        self.type = 2 # Basically it is a probabliy event
         self.probality = 0
+        self.trigger = None
+        self.value = None
+        self.feature = None
+        self.condition = None
+        self.factor = None
+        self.change_type = None
         
     def print_event_detail (self): # To DeBUG ; Print all details of event
         print("------------------------------")
@@ -26,86 +33,102 @@ class Event:
             print(f"Probablity: {self.probality}")
         print("------------------------------")
     
-    def set_probablity(self, probablity):
-        self.probality = probablity
-    
-    def set_trigger (self, trigger, value, feature ,condition, factor, change_type = "DEC"):
+    def set_trigger (self, trigger, value, feature ,condition, factor, change_type = "DEC", probablity = 0):
         """
-        trigger: feature of creature
+        trigger: feature of creature that trigs (if input is string we find its index, if int we assume it as index number)
         value: Value to be checked depending on condition
+        feature: Feature of creature that will change (if input is string we find its index, if int we assume it as index number)
+        factor: Descripts how mych feature will change
         condition: Equal(E), Greater(G), Smaller(S)
+        
+        Example means: For (G), if trigger value is greater then feature then process
+                       For (S), if trigger value is smaller then feature then process
         """
-        trigger_index = self.creature.find_feature_index(trigger)
-        # To handle wrong trigger features
-        if trigger_index == -1:
-            return -1 
-        feature_index = self.creature.find_feature_index(feature)
-        # To handle wrong feature index
-        if feature_index == -1:
-            return -1 
+        self.type = 2 # If an event object uses triggered event that means it is a possiblity type event
+        self.probality = probablity
+        self.trigger = trigger
+        self.value = value
+        self.feature = feature
+        self.condition = condition.upper()
+        self.factor = factor
+        self.change_type = change_type.upper()
+    
+    def set_iterational_event (self, feature, factor, change_type="DEC"):
+        # Same logic with (set_trigger) function, however because of this is a iterational event we just need these variables: feature, change_type and factor
+        self.type = 1 # If an event object uses iterational event that means it is a iterational type event
+        self.feature = feature
+        self.change_type = change_type.upper()
+        self.factor = factor
         
-        # Check for iterationally event
-        if self.type == 1:
-            self.process_event(factor, feature_index, change_type)
-            return 0
-        
-        if condition == 'E':
-            if self.creature.features[trigger_index][1] == value:
-                self.process_event(factor, feature_index, change_type)
-        elif condition == 'G':
-            if self.creature.features[trigger_index][1] > value:
-                self.process_event(factor, feature_index, change_type)
-        elif condition == 'S':
-            if self.creature.features[trigger_index][1] < value:
-                self.process_event(factor, feature_index, change_type)
-        else: # To handle with wrong condition
-            return -2
             
-    def process_event(self, factor, index, type):
+    def process_event(self):
         #Types: Decrease(DEC), Increase(INC), Set(SET)
-        #
-        #
-        # If trigger is a boolean and factor is greater than 0, that means it will be change
-        if self.type == 1:
-            # This means this event will happen with definite probablity
-            # Check for if it is boolean
-            value = self.creature.features[index][1]
-            if value == True and factor > 0:
-                value = False
-            elif value == False and factor > 0:
-                value = True
-            else:
-                if type.upper() == "DEC":
-                    value -= factor
-                elif type.upper() == "INC":
-                    value += factor
-                elif type.upper() == "SET":
-                    value = factor
-                else:
-                    # Handle with wrong type
-                    return -1
-            self.creature.features[index][1] = value
         
-        # To do probablity events           
-        elif self.type == 2:
-            p = random.randint(1,100)
-            if p < self.probality:
-                # Check for if it is boolean
-                value = self.creature.features[index][1]
-                if value == True:
-                    value = False
-                elif value == False:
-                    value = True
-                else:
-                    if type.upper() == "DEC":
-                        value -= factor
-                    elif type.upper() == "INC":
-                        value += factor
-                    elif type.upper() == "SET":
-                        value = factor
-                    else:
-                        # Handle with wrong type
-                        return -1
-                self.creature.features[index][1] = value
+        #Check for None Values that are necessary (It shows that trigger not setted successfuly)
+        if ((self.probality != None and self.trigger != None and self.value != None and self.feature != None and 
+            self.condition != None and self.factor != None and self.change_type != None) or
+            (self.type == 1 and self.feature != None and self.change_type != None and self.factor != None)):
+            # First part for possibility events and second part for iteratively event (Definite possible)
+            # Basically we are not looking for a condition for iterative events so ot need to trigger, value and condition variables.
             
+            trigger_index = None
+            feature_index = None
+            if self.type != 1: # If its not a niterational event
+                # Handle with string or int type of trigger input (int means index of feature and trigger)
+                if type(self.trigger) == type("String"):
+                    trigger_index = self.creature.find_feature_index(self.trigger)
+                    if trigger_index == -1: # Means could not founded in creature features
+                        return "Trigger index Error!"
+                if type(self.trigger) == type(1):
+                    trigger_index = self.trigger
+                    if trigger_index < 0 or trigger_index >= len(self.creature.get_feature_list()): # Ensure that index is in range
+                        return "Trigger out of index!"
+            
+                
+            # Handle with string or int type of feature input (int means index of feature and trigger)
+            if type(self.feature) == type("String"):
+                feature_index = self.creature.find_feature_index(self.feature)
+                if feature_index == -1: # Means could not founded in creature features
+                    return "Feature index Error!"
+            if type(self.feature) == type(1):
+                feature_index = self.feature
+                if feature_index < 0 or feature_index >= len(self.creature.get_feature_list()): # Ensure that index is in range
+                    return "Feature out of index!"
+                
+            process_key = False
+            if self.type == 1:
+                process_key = True
+            else:
+                # Check for condtion is satisfied
+                if self.condition == 'E' and self.creature.features[trigger_index][1] == self.value:
+                    process_key = True
+                elif self.condition == 'G' and self.creature.features[trigger_index][1] > self.value:
+                    process_key = True
+                elif self.condition == 'S' and self.creature.features[trigger_index][1] < self.value:
+                    process_key = True
+            
+            if process_key == True:
+                # Apply possibility condition
+                p = random.randint(1,100)
+                if p < self.probality or self.type == 1:
+                    # If trigger is a boolean and factor is greater than 0, that means it will be change
+                    # Check for if it is boolean
+                    value = self.creature.features[feature_index][1]
+                    if value == True and self.factor > 0:
+                        value = False
+                    elif value == False and self.factor > 0:
+                        value = True
+                    else:
+                        if self.change_type == "DEC":
+                            value -= self.factor
+                        elif self.change_type == "INC":
+                            value += self.factor
+                        elif self.change_type == "SET":
+                            value = self.factor
+                        else:
+                            # Handle with wrong type
+                            return -1
+                    self.creature.features[feature_index][1] = value
+            
+                
             
