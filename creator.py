@@ -48,3 +48,10 @@ class Creator:
         index = self.find_feature_index(feature_name)
         if index != -1:
             self.features[index][1] = value
+    
+    def check_die (self):
+        index_of_health = self.find_feature_index("health")     
+        index_of_alived = self.find_feature_index("alived")
+        if self.features[index_of_health][1] <= 0:
+            self.features[index_of_alived][1] = False   
+            
