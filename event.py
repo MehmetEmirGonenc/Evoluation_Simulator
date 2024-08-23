@@ -11,9 +11,9 @@ class Event:
     2- Probablity_Event (2)
     """
     
-    def __init__ (self, name, creature):
+    def __init__ (self, name, creature_group):
         self.name = name
-        self.creature = creature
+        self.creature_group = creature_group # This group means multiple creatures on a list but in the same type
         
         self.type = 2 # Basically it is a probabliy event
         self.probality = 0
@@ -76,59 +76,63 @@ class Event:
             if self.type != 1: # If its not a niterational event
                 # Handle with string or int type of trigger input (int means index of feature and trigger)
                 if type(self.trigger) == type("String"):
-                    trigger_index = self.creature.find_feature_index(self.trigger)
+                    trigger_index = self.creature_group[0].find_feature_index(self.trigger)
                     if trigger_index == -1: # Means could not founded in creature features
                         return "Trigger index Error!"
                 if type(self.trigger) == type(1):
                     trigger_index = self.trigger
-                    if trigger_index < 0 or trigger_index >= len(self.creature.get_feature_list()): # Ensure that index is in range
+                    if trigger_index < 0 or trigger_index >= len(self.creature_group[0].get_feature_list()): # Ensure that index is in range
                         return "Trigger out of index!"
             
                 
             # Handle with string or int type of feature input (int means index of feature and trigger)
             if type(self.feature) == type("String"):
-                feature_index = self.creature.find_feature_index(self.feature)
+                feature_index = self.creature_group[0].find_feature_index(self.feature)
                 if feature_index == -1: # Means could not founded in creature features
                     return "Feature index Error!"
             if type(self.feature) == type(1):
                 feature_index = self.feature
-                if feature_index < 0 or feature_index >= len(self.creature.get_feature_list()): # Ensure that index is in range
+                if feature_index < 0 or feature_index >= len(self.creature_group[0].get_feature_list()): # Ensure that index is in range
                     return "Feature out of index!"
                 
-            process_key = False
-            if self.type == 1:
-                process_key = True
-            else:
-                # Check for condtion is satisfied
-                if self.condition == 'E' and self.creature.features[trigger_index][1] == self.value:
+            # A loop to do event for each creature on the list as same type
+            for i in range(len(self.creature_group)):
+                process_key = False
+                if self.type == 1:
                     process_key = True
-                elif self.condition == 'G' and self.creature.features[trigger_index][1] > self.value:
-                    process_key = True
-                elif self.condition == 'S' and self.creature.features[trigger_index][1] < self.value:
-                    process_key = True
-            
-            if process_key == True:
-                # Apply possibility condition
-                p = random.randint(1,100)
-                if p < self.probality or self.type == 1:
-                    # If trigger is a boolean and factor is greater than 0, that means it will be change
-                    # Check for if it is boolean
-                    value = self.creature.features[feature_index][1]
-                    if value == True and self.factor > 0:
-                        value = False
-                    elif value == False and self.factor > 0:
-                        value = True
-                    else:
-                        if self.change_type == "DEC":
-                            value -= self.factor
-                        elif self.change_type == "INC":
-                            value += self.factor
-                        elif self.change_type == "SET":
-                            value = self.factor
-                        else:
-                            # Handle with wrong type
-                            return -1
-                    self.creature.features[feature_index][1] = value
+                else:
+                    # Check for condtion is satisfied
+                    if self.condition == 'E' and self.creature_group[i].features[trigger_index][1] == self.value:
+                        process_key = True
+                    elif self.condition == 'G' and self.creature_group[i].features[trigger_index][1] > self.value:
+                        process_key = True
+                    elif self.condition == 'S' and self.creature_group[i].features[trigger_index][1] < self.value:
+                        process_key = True
+                
+                if process_key == True:
+                    # Apply possibility condition
+                    p = random.randint(1,100)
+                    if p < self.probality or self.type == 1:
+                        alived_index = self.creature_group[i].find_feature_index("alived")
+                        if self.creature_group[i].features[alived_index][1] == True: # Check for if creature still alive
+                            # If trigger is a boolean and factor is greater than 0, that means it will be change
+                            # Check for if it is boolean
+                            value = self.creature_group[i].features[feature_index][1]
+                            if type(value) == type(False) and value == True and self.factor > 0:
+                                value = False
+                            elif type(value) == type(False) and value == False and self.factor > 0:
+                                value = True
+                            else:
+                                if self.change_type == "DEC":
+                                    value -= self.factor
+                                elif self.change_type == "INC":
+                                    value += self.factor
+                                elif self.change_type == "SET":
+                                    value = self.factor
+                                else:
+                                    # Handle with wrong type
+                                    return -1
+                            self.creature_group[i].features[feature_index][1] = value
             
                 
             

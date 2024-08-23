@@ -7,14 +7,18 @@ class Simulator:
         self.creatures = creatures
         self.events = events
         
-    def simulate (self, iteration_number):
+    def simulate (self, iteration_number, debug_mode = False):
         for iteration in range(iteration_number): # Repeat as much as iteration_number
-            # Print Out creature details to #DEBUG#
-            print("******************************",iteration+1,"******************************")
-            for creature in self.creatures:
-                creature.check_die()
-                creature.print_features()
-            print("*******************************************************************")
         
             for event in self.events: # Do each event
                 event.process_event()
+                
+            # Print Out creature details to #DEBUG#
+            if debug_mode == True:
+                print("******************************",iteration+1,"******************************")
+            for creature in self.creatures:
+                creature.check_die()
+                if debug_mode == True:
+                    creature.print_features()
+            if debug_mode == True:
+                print("*******************************************************************")
